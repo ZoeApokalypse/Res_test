@@ -11,6 +11,7 @@
 #include <string>
 #include <sstream>
 #include <cctype>
+#include <cstdint>
 
 using namespace std;
 

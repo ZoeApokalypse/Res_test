@@ -118,9 +118,16 @@ void WIN_Control(int op1)
                     WIN_OutOrder* out;
                     out = new WIN_OutOrder(d);
 
+                    label:
                     cout << "\nEnter 1 to log in\nEnter 2 to register\n\nPlease enter: ";
                     int temp;
                     cin >> temp;
+
+                    if (!(temp == 1 || temp == 2))
+                    {
+                        cout << "Input instruction error!" << endl;
+                        goto label;
+                    }
                     switch (temp)
                     {
                         case 1:

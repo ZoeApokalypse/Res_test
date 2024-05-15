@@ -12,6 +12,11 @@
 #include <sstream>
 #include <vector>
 #include "Date.h"
+#include <locale>
+#include <codecvt>
+#include <fstream>
+#include <iostream>
+#include <sstream>
 
 using namespace std;
 static double discount = 10;
@@ -94,58 +99,55 @@ void Menu::L_Print(int i)
     << '\t' << '\t' << COST [i] << '\t' << '\t' << PROFIT [i] << endl;
 }
 
-void Menu::MENU()
-{
+void Menu::MENU() {
     string file = address;
-    ifstream MENU (file.c_str());
-    if (!MENU.is_open())
+    ifstream MENU(file);
+
+    if (!MENU.is_open()) {
         cout << "Can't open the MENU file!" << endl;
+        return;
+    }
+
+    // 设置读取文件的locale为UTF-8
+    MENU.imbue(std::locale(std::locale(), new std::codecvt_utf8<wchar_t>));
+
     count = 0;
-    //initialization();//TEST
 
-    while (std::getline(MENU, line_temp))
-    {
-        //cout << count << endl;//test
-        //cout << line_temp << endl;//test
+    while (std::getline(MENU, line_temp)) {
+        wstring_convert<codecvt_utf8<wchar_t>> converter;
+        wstring wide_line = converter.from_bytes(line_temp);
+
         int m = 0;
-        for (int i = 0; i < line_temp.length(); i++)
-        {
-            if (line_temp[i] == ',')//split
-            {
-                Split[m] = line_temp.substr(0, i);
-                line_temp.erase(0, i+1);
-                i = 0;
-                m++;
-            }
-            else if (i == line_temp.length()-1)  // Last word
-                Split [m] = line_temp.substr(0, i+1);
+        size_t pos = 0;
+        while ((pos = wide_line.find(L',')) != wstring::npos) {
+            Split[m] = converter.to_bytes(wide_line.substr(0, pos));
+            wide_line.erase(0, pos + 1);
+            m++;
         }
+        Split[m] = converter.to_bytes(wide_line);
 
-        id [count] = toInt(Split[0]);//String to int
-        name [count] = Split [1];
-        price [count]= toInt(Split[2]);
-        raw_material_1 [count] = Split [3];
-        PoRM_1 [count]= toInt(Split[4]);
-        raw_material_2 [count] = Split [5];
-        PoRM_2 [count]= toInt(Split[6]);
-        raw_material_3 [count] = Split [7];
-        PoRM_3 [count]= toInt(Split[8]);
-        raw_material_4 [count] = Split [9];
-        PoRM_4 [count]= toInt(Split[10]);
-        COST [count] = PoRM_1 [count] + PoRM_2 [count] + PoRM_3 [count] + PoRM_4 [count];
-        PROFIT [count] = price [count] - COST [count];
+        id[count] = toInt(Split[0]);
+        name[count] = Split[1];
+        price[count] = toInt(Split[2]);
+        raw_material_1[count] = Split[3];
+        PoRM_1[count] = toInt(Split[4]);
+        raw_material_2[count] = Split[5];
+        PoRM_2[count] = toInt(Split[6]);
+        raw_material_3[count] = Split[7];
+        PoRM_3[count] = toInt(Split[8]);
+        raw_material_4[count] = Split[9];
+        PoRM_4[count] = toInt(Split[10]);
+        COST[count] = PoRM_1[count] + PoRM_2[count] + PoRM_3[count] + PoRM_4[count];
+        PROFIT[count] = price[count] - COST[count];
 
-        //if the number of Raw materials is less than 4, replace the null string with "NULL"
         fill_in_null(raw_material_1[count]);
         fill_in_null(raw_material_2[count]);
         fill_in_null(raw_material_3[count]);
         fill_in_null(raw_material_4[count]);
-        //cout << endl;//test
-        count ++;
-    }
-    //initialization();//TEST!!NULL
-}
 
+        count++;
+    }
+}
 void Menu::print()//for customers
 {
     cout << "Number\tName\t\t\t\t\t\t\tPrice\n";
